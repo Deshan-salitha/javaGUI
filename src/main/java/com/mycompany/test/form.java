@@ -14,6 +14,7 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +22,7 @@ import java.util.TreeMap;
 import static javax.management.Query.value;
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
@@ -47,6 +49,7 @@ public class form extends javax.swing.JFrame {
      */
     public form() {
         initComponents();
+//        System.out.println(user.toArray());
     }
 
     /**
@@ -220,32 +223,27 @@ public class form extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+
+        addUser();
+        System.out.println( user.get(0));
+//        jTextArea1.setText(for (int i = 0; i < user.size(); i++){});
+        jTextField4.setText(user.toString());
+        addRowToJTabale();
+        System.out.println(user.toString());
+//        addRowToExcel();
+//        textArea1.setText(l.getSelectedValuesList());
         
-        
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    public void addUser(){
         u.setId(Integer.parseInt(jTextField1.getText()));
         u.setName(jTextField2.getText());
         u.setEmail(jTextField3.getText());
         System.err.println("adding stage"+u.getId());
           
         user.add(u);
-//        jTextArea1.setText(for (int i = 0; i < user.size(); i++){});
-        jTextField4.setText(user.toString());
-//        jTextField5.setText("as");
-        addRowToJTabale();
-        System.out.println(user.toString());
-//        addRowToExcel();
- 
-         
-          
-//        textArea1.setText(l.getSelectedValuesList());
-        
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }
 
-//    public void WirteExcel{
-//        
-//        
-//    }
-    
     public void addRowToJTabale(){
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
         Object rowData[] = new Object[3];
@@ -258,7 +256,7 @@ public class form extends javax.swing.JFrame {
         }
 
     }
-    
+
     public void addRowToExcel(){
         //blank wookbook
         XSSFWorkbook workbook = new XSSFWorkbook();
@@ -305,10 +303,21 @@ public class form extends javax.swing.JFrame {
         {
             e.printStackTrace();
         }
+//            try {
+//
+//            FileWriter writer = new FileWriter("User.txt", true);
+//            writer.write(u.getId());
+//            writer.write(u.getName());
+//            writer.write(u.getEmail());
+//            JOptionPane.showMessageDialog(rootPane, "Success");
+//
+//            } catch (Exception e) {
+//               JOptionPane.showMessageDialog(rootPane, "Error");
+//            }
 
     }
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        addRowToJTabale();
+//        addRowToJTabale();
 //        System.exit(0);
 //        jTextField5.setText();
     }//GEN-LAST:event_jButton1ActionPerformed
