@@ -4,6 +4,8 @@
  */
 package com.mycompany.test;
 
+import com.mycompany.test.model.User;
+import com.mycompany.test.service.WriteToExcel;
 import java.awt.*;
 import static java.awt.AWTEventMulticaster.add;
 import java.util.ArrayList;
@@ -13,12 +15,18 @@ import javax.swing.ListModel;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static javax.management.Query.value;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -42,8 +50,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class form extends javax.swing.JFrame {
     static JList b;
     public static JList list;
-    List <User> user = new ArrayList();
-        User u = new User();
+    List<User> user = new ArrayList();
+    private int clicks = 0;
     /**
      * Creates new form form
      */
@@ -78,6 +86,8 @@ public class form extends javax.swing.JFrame {
         jTable1 = new javax.swing.JTable();
         jButton4 = new javax.swing.JButton();
         jTextField4 = new javax.swing.JTextField();
+        jToggleButton1 = new javax.swing.JToggleButton();
+        jToggleButton2 = new javax.swing.JToggleButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -118,6 +128,11 @@ public class form extends javax.swing.JFrame {
                 "ID", "Name", "Email"
             }
         ));
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTable1MouseClicked(evt);
+            }
+        });
         jScrollPane2.setViewportView(jTable1);
 
         jButton4.setText("Write to Excel");
@@ -129,38 +144,58 @@ public class form extends javax.swing.JFrame {
 
         jTextField4.setText("jTextField4");
 
+        jToggleButton1.setText("Update");
+        jToggleButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jToggleButton1ActionPerformed(evt);
+            }
+        });
+
+        jToggleButton2.setText("Delele");
+        jToggleButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jToggleButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(32, 32, 32)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(29, 29, 29)
+                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jTextField1)
-                            .addComponent(jTextField2)
-                            .addComponent(jTextField3, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE)))
-                    .addComponent(jTextField5, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jButton1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton4)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jButton2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton3)))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 426, Short.MAX_VALUE)
-                    .addComponent(jTextField4))
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(29, 29, 29)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jTextField1)
+                                    .addComponent(jTextField2)
+                                    .addComponent(jTextField3, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE)))
+                            .addComponent(jTextField5, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(12, 12, 12)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 426, Short.MAX_VALUE)
+                            .addComponent(jTextField4)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jToggleButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jToggleButton2)))
                 .addContainerGap(32, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -187,16 +222,21 @@ public class form extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(22, 22, 22)
-                .addComponent(jButton4)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(28, 28, 28)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jToggleButton1)
+                            .addComponent(jToggleButton2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jButton1)
-                            .addComponent(jButton2)
+                            .addComponent(jButton2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton4)
                             .addComponent(jButton3))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap())
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -225,30 +265,32 @@ public class form extends javax.swing.JFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
 
         addUser();
-        System.out.println( user.get(0));
+//        System.out.println(user.get(0));
 //        jTextArea1.setText(for (int i = 0; i < user.size(); i++){});
         jTextField4.setText(user.toString());
         addRowToJTabale();
-        System.out.println(user.toString());
+        clicks++;
+//        System.out.println(user.toString());
 //        addRowToExcel();
 //        textArea1.setText(l.getSelectedValuesList());
         
     }//GEN-LAST:event_jButton2ActionPerformed
 
     public void addUser(){
+         User u = new User();
         u.setId(Integer.parseInt(jTextField1.getText()));
         u.setName(jTextField2.getText());
         u.setEmail(jTextField3.getText());
-        System.err.println("adding stage"+u.getId());
-          
+        System.err.println("adding stage" + u.getId());
+
         user.add(u);
     }
 
     public void addRowToJTabale(){
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0);
         Object rowData[] = new Object[3];
-         for(int i = 0; i < 1; i++)
-        {
+        for (int i = 0; i < user.size(); i++) {
             rowData[0] = user.get(i).getId();
             rowData[1] = user.get(i).getName();
             rowData[2] = user.get(i).getEmail();
@@ -257,82 +299,142 @@ public class form extends javax.swing.JFrame {
 
     }
 
-    public void addRowToExcel(){
-        //blank wookbook
-        XSSFWorkbook workbook = new XSSFWorkbook();
+        public void getAllDataFromExcel() throws FileNotFoundException, IOException {
         
-        //create blank sheet
-        XSSFSheet sheet = workbook.createSheet();
-//        XSSFSheet sheet = new XSSFSheet();
-         //This data needs to be written (Object[])
-        Map<String, Object[]> data = new TreeMap<String, Object[]>();
-        for(int i =0; i < user.size(); i++){
-            System.out.println(i);
-            System.out.println(user.get(i).getId());
-            System.err.println(user);
-            System.out.println(user.get(0).toString());
-            data.put(Integer.toString(i), new Object[] {user.get(i).getId(),user.get(i).getName(),user.get(i).getEmail()});
-        }
-          
-        //Iterate over data and write to sheet
-        Set<String> keyset = data.keySet();
-        int rownum = 0;
-        for (String key : keyset)
-        {
-            Row row = sheet.createRow(rownum++);
-            Object [] objArr = data.get(key);
-            int cellnum = 0;
-            for (Object obj : objArr)
-            {
-               Cell cell = row.createCell(cellnum++);
-               if(obj instanceof String)
-                    cell.setCellValue((String)obj);
-                else if(obj instanceof Integer)
-                    cell.setCellValue((Integer)obj);
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0);
+        File file = new File("Users.xlsx");
+        FileInputStream fin = new FileInputStream(file);
+        XSSFWorkbook wb = new XSSFWorkbook(fin);
+        XSSFSheet sheet = wb.getSheetAt(0);
+        Iterator<Row> itr = sheet.iterator();
+        int rowcount = 1;
+        while(itr.hasNext()){
+            Row row = itr.next();
+            int cellcounter = 0;
+            Iterator<Cell> cellinterator = row.cellIterator();
+            User u = new User();
+            while(cellinterator.hasNext()){
+                Cell cel = cellinterator.next();
+                switch(cel.getCellType()){
+                    case NUMERIC:
+                        System.out.print((int) cel.getNumericCellValue()+"\t\t");
+                        if(rowcount==cel.getNumericCellValue()){
+                            u.setId((int) cel.getNumericCellValue());        
+                        }
+                        rowcount++;
+                        cellcounter++;
+                        break;
+                    case STRING:
+                        System.out.print(cel.getStringCellValue()+"\t\t");
+                        if(cellcounter==1){
+                            u.setName(cel.getStringCellValue());
+                        }else if(cellcounter==2){
+                            u.setEmail(cel.getStringCellValue());
+                        }
+                        cellcounter++;
+                        break;
+                }                
             }
-        }
-        try
-        {
-            //Write the workbook in file system
-            FileOutputStream out = new FileOutputStream(new File("Users.xlsx"));
-            workbook.write(out);
-            out.close();
-            System.out.println("Users.xlsx written successfully on disk.");
-        } 
-        catch (Exception e) 
-        {
-            e.printStackTrace();
-        }
-//            try {
-//
-//            FileWriter writer = new FileWriter("User.txt", true);
-//            writer.write(u.getId());
-//            writer.write(u.getName());
-//            writer.write(u.getEmail());
-//            JOptionPane.showMessageDialog(rootPane, "Success");
-//
-//            } catch (Exception e) {
-//               JOptionPane.showMessageDialog(rootPane, "Error");
+            user.add(u);
+            
+//            Object rowData[] = new Object[3];
+//            for (int i = 0; i < 1; i++) {
+//                rowData[0] = user.get(i).getId();
+//                rowData[1] = user.get(i).getName();
+//                rowData[2] = user.get(i).getEmail();
+//                model.addRow(rowData);
 //            }
-
+            System.out.println("");
+            
+        }
+        jTextField4.setText(user.toString());
+        Object rowData[] = new Object[3];
+            for (int i = 0; i < user.size(); i++) {
+                rowData[0] = user.get(i).getId();
+                rowData[1] = user.get(i).getName();
+                rowData[2] = user.get(i).getEmail();
+                model.addRow(rowData);
+            }
+        
     }
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+
+        try {
+            getAllDataFromExcel();
+//            jTextField4.setText(user.toString());
 //        addRowToJTabale();
 //        System.exit(0);
 //        jTextField5.setText();
+        } catch (IOException ex) {
+            Logger.getLogger(form.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+          
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
         jTextField1.setText("");
         jTextField2.setText("");
         jTextField3.setText("");
         jTextField5.setText("");
+        model.setRowCount(0);
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-    addRowToExcel();
+    WriteToExcel.addRowToExcel(user);
     }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
+
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        User u = new User();
+        int index = Integer.parseInt(jTextField1.getText());
+        System.out.println(index);
+        user.set(index-1, new User(index,jTextField2.getText(),jTextField3.getText()));
+        jTextField4.setText(user.toString());
+        model.setRowCount(0);
+        Object rowData[] = new Object[3];
+        for (int i = 0; i < user.size(); i++) {
+            rowData[0] = user.get(i).getId();
+            rowData[1] = user.get(i).getName();
+            rowData[2] = user.get(i).getEmail();
+            model.addRow(rowData);
+        }
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jToggleButton1ActionPerformed
+
+    private void jToggleButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton2ActionPerformed
+
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        int selectedRowIndex = jTable1.getSelectedRow();
+        int deleteindex = (int) model.getValueAt(selectedRowIndex, 0);
+        
+        user.remove(deleteindex);
+        jTextField4.setText(user.toString());
+        model.setRowCount(0);
+        Object rowData[] = new Object[3];
+        for (int i = 0; i < user.size(); i++) {
+            rowData[0] = user.get(i).getId();
+            rowData[1] = user.get(i).getName();
+            rowData[2] = user.get(i).getEmail();
+            model.addRow(rowData);
+        }
+        // TODO add your handling code here:
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jToggleButton2ActionPerformed
+
+    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        int selectedRowIndex = jTable1.getSelectedRow();
+        
+        jTextField1.setText(model.getValueAt(selectedRowIndex, 0).toString());
+        jTextField2.setText(model.getValueAt(selectedRowIndex, 1).toString());
+        jTextField3.setText(model.getValueAt(selectedRowIndex, 2).toString());
+// TODO add your handling code here:
+    }//GEN-LAST:event_jTable1MouseClicked
 
     /**
      * @param args the command line arguments
@@ -387,5 +489,7 @@ public class form extends javax.swing.JFrame {
     private javax.swing.JTextField jTextField4;
     private javax.swing.JTextField jTextField5;
     private javax.swing.JTextPane jTextPane1;
+    private javax.swing.JToggleButton jToggleButton1;
+    private javax.swing.JToggleButton jToggleButton2;
     // End of variables declaration//GEN-END:variables
 }
